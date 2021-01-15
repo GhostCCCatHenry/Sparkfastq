@@ -3,7 +3,9 @@ package DRCfastq.util;
 
 import DRCfastq.entities.base_char.MatchEntry;
 import DRCfastq.entities.base_char.ref_base;
+import DRCfastq.entities.qualityS.qualityScores;
 import DRCfastq.util.base_func.comBase;
+import DRCfastq.util.quality_func.q_Compressor;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.spark.SparkConf;
@@ -57,15 +59,27 @@ public class SparkApp {
 
     public void spark_qs(Iterator<String> s,dealReads dr){
         int i = 0;
+        boolean call = false;
+        q_Compressor qc = new q_Compressor();
+        qualityScores qs = new qualityScores();
         while (s.hasNext()) {
             String str =  s.next();
             if(i==3) {
                 i=0;
-
+                if(!call){
+                    call = qc.qs_compress(str,qs);
+                }else if(str!=null){
+                    qc.dealing(str,qs);
+                }
                 continue;
             }
-
             i++;
+        }
+
+        for(int j = 0; j < 2; ++j) {
+            if(qc.sb[j].size() > 0) {
+                qc.write(qc.sb[j], (byte) j, qc.pre[j], qc.cur[j], qc.eline[j]);
+            }
         }
 
     }

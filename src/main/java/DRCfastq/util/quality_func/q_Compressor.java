@@ -102,6 +102,14 @@ public class q_Compressor {
         base -= 1;
     }
 
+    public q_Compressor() {
+        sb = new byteBuffer[2];//此处的StringBuffer不是字符串操作类，是自定义类！
+        sb[0] = new byteBuffer();
+        sb[1] = new byteBuffer();
+        for(int j = 1; j < k; ++j) base = base << 7;
+        base -= 1;
+    }
+
     private void pack(byteBuffer in) {
         if(in.size()==0) return;
         byteBuffer out = new byteBuffer(in.size()/2);
