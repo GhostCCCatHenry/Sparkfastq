@@ -23,6 +23,7 @@ public class q_Compressor {
     private BufferedWriter bw ;
     private BufferedReader br;
     private int k = 2;
+    private float α = (float) 0.1;
     private String s = "";
 //    String str;
     public byteBuffer[]sb ;
@@ -33,7 +34,6 @@ public class q_Compressor {
 
     private int flag = 0;
     private int num = 0;
-//    ThreadID wid;
 
     public void get_score(qualityScores qs){
         int []score_cnt = new int[128];
@@ -43,6 +43,7 @@ public class q_Compressor {
         int max = Arrays.stream(score_cnt).max().getAsInt();
         score = (char) Arrays.binarySearch(score_cnt,max);
     }
+
     public double get_table(qualityScores qs){
 //        int k = 4;
         Map<Long, Integer> mp = new HashMap<>();
@@ -93,7 +94,7 @@ public class q_Compressor {
         return mx;
     }
 
-    public q_Compressor(BufferedWriter output) throws IOException{
+    public q_Compressor(BufferedWriter output){
         bw = output;
         sb = new byteBuffer[2];//此处的StringBuffer不是字符串操作类，是自定义类！
         sb[0] = new byteBuffer();
@@ -139,7 +140,9 @@ public class q_Compressor {
                 }
                 if (len == 1) {
                     if (c == 10) {
-                        len = j = k = 0;
+                        len = j = 0;
+//                        j = 0;
+                        k = 0;
                         out.put(0);
                         continue;
                     }
@@ -158,7 +161,7 @@ public class q_Compressor {
         qs.addSampleByturn(str);
         if(qs.getSample().size() == 100000){
             get_score(qs);
-            qs.setBoarder(get_table(qs) * 0.5);
+            qs.setBoarder(get_table(qs) * α);
             compress_qs(qs);
         }
         return  (qs.getSample().size() == 100000);
@@ -222,7 +225,7 @@ public class q_Compressor {
         bf.eline=eline;
 //        bf.method=method;
         bf.in = s;
-        pack(s);
+        pack(bf.in);
         try {
             int i = 0;
             int out = 0;
@@ -234,8 +237,6 @@ public class q_Compressor {
                 i++;
                 bw.write(out);
             }
-//            bw.write(cb.array());
-//            System.out.println("长度为"+i+"的块已变换完毕");
             bw.newLine();
             bw.flush();
         } catch (IOException e) {

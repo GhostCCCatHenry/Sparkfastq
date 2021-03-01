@@ -29,8 +29,6 @@ public class SparkApp {
     private final int kmer_bit_num = 2 * kMerLen; //bit numbers of k-mer
     private final int hashTableLen = 1 << kmer_bit_num; // length of hash table
 
-
-
     public Tuple2<List<String>,List<MatchEntry>> spark_reads(Iterator<String> s,dealReads dr){
         int i = 0;
         while (s.hasNext()) {

@@ -79,17 +79,6 @@ public class ref_base implements java.io.Serializable{
 
     private char []ref_code;
 
-    //参考序列小写字符begin
-//    public int get_Ref_low_begin_byturn(int len) {
-//        return ref_low_begin[len];
-//    }
-//
-//    public void set_Ref_low_begin(int[] ref_low_begin) {
-//        this.ref_low_begin = ref_low_begin;
-//    }
-//
-//    public void set_Ref_low_begin_byturn(int begin,int len){this.ref_low_begin[len] = begin;}
-//
     public void setRefLoc(int[] refLoc) {
         this.refLoc = refLoc;
     }
@@ -98,19 +87,5 @@ public class ref_base implements java.io.Serializable{
         this.refBucket = refBucket;
     }
 
-//    private int[] ref_low_begin = new int[VEC_SIZE/2];
-
-    //参考序列小写字符length
-//    public int get_Ref_low_length_byturn(int len) {
-//        return ref_low_length[len];
-//    }
-//
-//    public void set_Ref_low_length(int[] ref_low_length) {
-//        this.ref_low_length = ref_low_length;
-//    }
-//
-//    public void set_Ref_low_length_byturn(int length,int len){this.ref_low_length[len] = length;}
-
-//    private int[] ref_low_length = new int[VEC_SIZE/2];
 
 }

@@ -30,11 +30,12 @@ public class dealReads {
     //第一行差量三元组
     private int second_size = 0;
     private List<String> name = new ArrayList<>();
+    private String id = "";
     private int namenum1 = 0;
     private int namenum2 = 0;
     private int tempN1 = 0;
     private int tempN2 = 0;
-    private List<String> sub1 = new ArrayList<>(10000000);
+    private StringBuilder sub1 = new StringBuilder();
 //    private List<Integer> sub2 = new ArrayList<>(10000000);
     private int linelen = 0;
 //    private Tuple3<String,Integer,List<Integer>> tp;
@@ -54,6 +55,7 @@ public class dealReads {
     private boolean n_flag = false;
     public List<String> other;
     private List<String> out;
+    private int percent = 0;
 
 
     //第四行
@@ -66,24 +68,19 @@ public class dealReads {
         this.t_bs = t_bs;
         this.other = new ArrayList<>();
         this.out = new ArrayList<>();
+        this.me_t = new ArrayList<>();
+
     }
 
-//    public void setOutput(String output) throws IOException{
-//        bw = new BufferedWriter(new FileWriter(output));
-//    }
-//
     public dealReads(ref_base rb,String filename,String outname) throws IOException{
-//        this.c = new ArrayList<>(100000);
         this.rb = rb;
-
-        qs =  new qualityScores();
         output = new File(outname);
         File tmp = new File(filename);
         if(tmp.isDirectory()){
             input = tmp.listFiles();
         }
         bw = new BufferedWriter(new FileWriter(output));
-        qc = new q_Compressor(bw);
+
     }
 
     public dealReads(ref_base rb){
@@ -135,7 +132,9 @@ public class dealReads {
             System.out.println("一次匹配完毕");
             comBase.saveOtherData(t_bs,other);
             other.addAll(name);
-            other.addAll(sub1);
+            other.add(sub1.toString());
+            this.name = new ArrayList<>();
+            this.sub1 = new StringBuilder();
 //            sabe
             secondMatch(ii);
 
@@ -155,11 +154,15 @@ public class dealReads {
         System.out.println("一次匹配完毕");
         comBase.saveOtherData(t_bs,other);
         other.addAll(name);
-        other.addAll(sub1);
+        other.add(sub1.toString());
+        this.name = new ArrayList<>();
+        this.sub1 = new StringBuilder();
 //        secondMatch();
     }
     public void readingSeq_q(File fp){
 //        File f = new File(filename);
+        qs =  new qualityScores();
+        qc = new q_Compressor(bw);
         try {
             LineIterator iter = FileUtils.lineIterator(fp,"UTF-8");
             int i = 0;//用于四行一组记录read的行
@@ -197,22 +200,24 @@ public class dealReads {
         int num1 = Integer.parseInt(tmp[0].substring(4));
         int num2 = Integer.parseInt(tmp[1]);
         if (name.size()!=0) {
-            if(tname.equals(name.get(name.size()-1))){
-                sub1.add((tempN1-num1)+" "+(tempN2-num2));
+            if(tname.equals(id)){
+                if(tempN1==num1) {
+                    sub1.append(num2).append(" ");
+                }else
+                    sub1.append(tempN1 - num1).append(" ").append(num2).append(" ");
 //                sub2.add(tempN2-num2);
                 tempN1 = num1;
-                tempN2 = num2;
                 return;
             }
             name.add(tname+" "+linelen);
+            id = tname;
 //            name.add(tname);
 //            name.add(String.valueOf(linelen));
             return;
         }
         tempN1=num1;
-        tempN2=num2;
         name.add(tname+" "+linelen+" "+num1+" "+num2);
-
+        id = tname;
     }
 
     public void secondLine(String str){
@@ -230,20 +235,22 @@ public class dealReads {
     }
 
     private void secondMatch(int ii){
-        long time1 = System.currentTimeMillis();
-        if(ii<=1)
+        if(ii<=percent){
             comBase.matchResultHashConstruct(me_t,seqBucketVec,seqLocVec,ii);
-        matchList.put(ii,me_t);
-        System.out.println((System.currentTimeMillis()-time1)/1000);
-
-        for (Map.Entry<Integer, List<MatchEntry>> integerListEntry : matchList.entrySet()) {
-            if(integerListEntry.getKey()==0) {
-                for (int i = 0; i < integerListEntry.getValue().size(); i++) {
-                    saveMatchEntry(integerListEntry.getValue().get(i));
-                }
-            }else
-                comBase.codeSecondMatch(me_t,ii+1,seqBucketVec,seqLocVec,matchList,out,10);
+            matchList.put(ii,me_t);
         }
+
+        System.out.println(me_t.size());
+
+//        for (Map.Entry<Integer, List<MatchEntry>> integerListEntry : matchList.entrySet()) {
+        if(ii==0) {
+            for (MatchEntry matchEntry : me_t) {
+                saveMatchEntry(matchEntry);
+            }
+        }else
+            comBase.codeSecondMatch(me_t,ii+1,seqBucketVec,seqLocVec,matchList,out,percent+1);
+//        }
+
         try {
             for (String s : other) {
                 bw.write(s);
@@ -255,13 +262,10 @@ public class dealReads {
             }
             bw.newLine();
             bw.flush();
+            out.clear();
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public void saveFirstLine(List<String> other){
-
     }
 
     public void saveMatchEntry(MatchEntry matchEntry) {
@@ -291,20 +295,7 @@ public class dealReads {
                 }
             }
             code.add(cnt);
-//            int cnt = 1;
-//            for (int i = 1; i < length-1; i++) {
-//                if (vec[i]==vec[i+1])
-//                    cnt++;
-//                else if(cnt!=1){
-//                    code.add(new Tuple2<>(vec[i],cnt));
-//
-//                    cnt = 1;
-//                }else {
-//                    code.add(new Tuple2<Character, Integer>(vec[i],null));
-//                    if(i==length-2)
-//                        code.add(new Tuple2<Character, Integer>(vec[i+1],null));
-//                }
-//            }
+
         }
         for (int c : code) {
             bw.write(c);

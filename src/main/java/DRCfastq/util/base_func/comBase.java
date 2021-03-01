@@ -17,7 +17,6 @@ import static java.lang.Math.min;
 
 public class comBase {
 
-    private static int k = 28;//
     private static final int VEC_SIZE = 1 << 20;
     //    private static final int PERCENT = 15; //the percentage of compressed sequence number uses as reference
     private static final int kMerLen = 14; //the length of k-mer
@@ -38,6 +37,8 @@ public class comBase {
 
         BufferedReader br = new BufferedReader(new FileReader(file));//使用Reader缓冲输入流的信息，被BufferedReader读取
         str = br.readLine();
+        //
+        int k = 0;
         if(str.equals(">chr1")||str.equals(">chr2")||str.equals(">chr3")||str.equals(">chr4")
                 ||str.equals(">chr5")||str.equals(">chr6")||str.equals(">chr7")||str.equals(">chr8")
                 ||str.equals(">chr9")||str.equals(">chr10")||str.equals(">chr11")||str.equals(">chr12")
@@ -48,26 +49,9 @@ public class comBase {
             cha = str.toCharArray();
             for (char a: cha) {
                 temp_cha=a;
-//                if(Character.isLowerCase(temp_cha)){
-//                    if (flag) //previous is upper case
-//                    {
-//                        flag = false; //change status of flag
-//                        ref.set_Ref_low_begin_byturn(letters_len,_ref_low_len);
-//                        //ref_low_begin[_ref_low_len] = letters_len;
-//                        letters_len = 0;
-//                    }
-//                    temp_cha = Character.toUpperCase(temp_cha);
-//                }
-//                else {
-//                    if (!flag)  //previous is lower case
-//                    {
-//                        flag = true;
-//                        ref.set_Ref_low_length_byturn(letters_len,_ref_low_len);
-//                        _ref_low_len++;
-//                        //ref_low_length[_ref_low_len++] = letters_len;
-//                        letters_len = 0;
-//                    }
-//                }
+                if(Character.isLowerCase(temp_cha)){
+                    temp_cha = Character.toUpperCase(temp_cha);
+                }
                 if (temp_cha == 'A' || temp_cha == 'C' || temp_cha == 'G' || temp_cha == 'T'){
                     ref.set_Ref_code_byturn(temp_cha,_seq_code_len);
                     _seq_code_len++;
@@ -375,7 +359,7 @@ public class comBase {
             else hashValue = abs(getHashValue(_mr.get(i)) + getHashValue(_mr.get(i+1))) % seqBucketLen;
             max_length = 0;
             //寻找相同序列
-            for (int m = 0; m < min( seqNum-1, percent); m++) {
+            for (int m = 0; m < min( seqNum-1, percent); m++) {//N
                 id = seqBucket_vec.get(m)[hashValue];//寻找出参考序列组的前m个编码序列依次匹配
                 if (id!=-1) {
                     for (pos = id; pos!=-1; pos = seqLoc_vec.get(m).get(pos)) {
